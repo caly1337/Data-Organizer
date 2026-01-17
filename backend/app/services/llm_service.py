@@ -147,9 +147,15 @@ class GeminiProvider(BaseLLMProvider):
 
             # Calculate approximate cost (Gemini 2.5 Flash pricing)
             # Input: $0.075 per 1M tokens, Output: $0.30 per 1M tokens
-            input_tokens = response.usage_metadata.prompt_token_count
-            output_tokens = response.usage_metadata.candidates_token_count
-            cost = (input_tokens * 0.075 / 1_000_000) + (output_tokens * 0.30 / 1_000_000)
+            input_tokens = 0
+            output_tokens = 0
+            cost = 0.0
+
+            # Try to get usage metadata if available
+            if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                input_tokens = getattr(response.usage_metadata, 'prompt_token_count', 0)
+                output_tokens = getattr(response.usage_metadata, 'candidates_token_count', 0)
+                cost = (input_tokens * 0.075 / 1_000_000) + (output_tokens * 0.30 / 1_000_000)
 
             return {
                 "response": response.text,
@@ -161,7 +167,6 @@ class GeminiProvider(BaseLLMProvider):
                 "metadata": {
                     "prompt_token_count": input_tokens,
                     "candidates_token_count": output_tokens,
-                    "total_token_count": response.usage_metadata.total_token_count,
                 }
             }
 

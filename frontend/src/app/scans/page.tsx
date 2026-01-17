@@ -59,6 +59,40 @@ export default function ScansPage() {
     }
   }
 
+  async function deleteScan(scanId: number) {
+    if (!confirm('Are you sure you want to delete this scan? This cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await apiClient.deleteScan(scanId);
+      await loadScans();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete scan');
+    }
+  }
+
+  async function deleteAllScans(status?: string) {
+    const statusText = status ? ` with status "${status}"` : '';
+    if (!confirm(`Are you sure you want to delete ALL scans${statusText}? This cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const scansToDelete = status
+        ? scans.filter(s => s.status === status)
+        : scans;
+
+      for (const scan of scansToDelete) {
+        await apiClient.deleteScan(scan.id);
+      }
+
+      await loadScans();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete scans');
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen p-8 flex items-center justify-center">
@@ -78,12 +112,41 @@ export default function ScansPage() {
               Analyze and organize your filesystems with AI
             </p>
           </div>
-          <button
-            onClick={() => setShowNewScan(true)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            + New Scan
-          </button>
+          <div className="flex gap-3">
+            {scans.length > 0 && (
+              <div className="relative group">
+                <button className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                  🗑️ Cleanup
+                </button>
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                  <button
+                    onClick={() => deleteAllScans('failed')}
+                    className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
+                  >
+                    Delete Failed Scans
+                  </button>
+                  <button
+                    onClick={() => deleteAllScans('completed')}
+                    className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    Delete Completed Scans
+                  </button>
+                  <button
+                    onClick={() => deleteAllScans()}
+                    className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-lg text-red-600"
+                  >
+                    Delete ALL Scans
+                  </button>
+                </div>
+              </div>
+            )}
+            <button
+              onClick={() => setShowNewScan(true)}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              + New Scan
+            </button>
+          </div>
         </div>
 
         {/* Error */}
@@ -193,6 +256,7 @@ export default function ScansPage() {
                 key={scan.id}
                 scan={scan}
                 onClick={() => router.push(`/scans/${scan.id}`)}
+                onDelete={() => deleteScan(scan.id)}
               />
             ))}
           </div>

@@ -6,9 +6,10 @@ import type { Scan } from '@/lib/api';
 interface ScanCardProps {
   scan: Scan;
   onClick?: () => void;
+  onDelete?: (e: React.MouseEvent) => void;
 }
 
-export default function ScanCard({ scan, onClick }: ScanCardProps) {
+export default function ScanCard({ scan, onClick, onDelete }: ScanCardProps) {
   return (
     <div
       onClick={onClick}
@@ -58,6 +59,20 @@ export default function ScanCard({ scan, onClick }: ScanCardProps) {
       {scan.errors_count > 0 && !scan.error_message && (
         <div className="mt-3 text-sm text-orange-600">
           {scan.errors_count} error{scan.errors_count > 1 ? 's' : ''} during scan
+        </div>
+      )}
+
+      {onDelete && (
+        <div className="mt-4 pt-3 border-t">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(e);
+            }}
+            className="px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
+          >
+            Delete Scan
+          </button>
         </div>
       )}
     </div>

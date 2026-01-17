@@ -137,13 +137,26 @@ export default function ScanDetailPage() {
               <h1 className="text-4xl font-bold mb-2">Scan #{scan.id}</h1>
               <p className="text-xl text-gray-600">{scan.path}</p>
             </div>
-            <span
-              className={`px-4 py-2 rounded-full text-lg font-medium ${getStatusColor(
-                scan.status
-              )}`}
-            >
-              {scan.status}
-            </span>
+            <div className="flex gap-3 items-center">
+              <button
+                onClick={async () => {
+                  if (confirm('Are you sure you want to delete this scan?')) {
+                    await apiClient.deleteScan(scan.id);
+                    router.push('/scans');
+                  }
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Delete
+              </button>
+              <span
+                className={`px-4 py-2 rounded-full text-lg font-medium ${getStatusColor(
+                  scan.status
+                )}`}
+              >
+                {scan.status}
+              </span>
+            </div>
           </div>
         </div>
 
