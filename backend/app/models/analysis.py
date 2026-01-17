@@ -38,7 +38,7 @@ class Analysis(Base):
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
     # Additional data
-    metadata = Column(JSON, nullable=True)
+    extra_metadata = Column(JSON, nullable=True)
 
     # Relationships
     scan = relationship("Scan", back_populates="analyses")

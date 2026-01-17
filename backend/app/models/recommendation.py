@@ -49,8 +49,8 @@ class Recommendation(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    # Metadata
-    metadata = Column(JSON, nullable=True)
+    # Extra metadata
+    extra_metadata = Column(JSON, nullable=True)
 
     # Relationships
     analysis = relationship("Analysis", back_populates="recommendations")

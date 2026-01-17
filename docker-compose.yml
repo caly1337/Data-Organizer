@@ -73,7 +73,7 @@ services:
   data-organizer-frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: data-organizer-frontend
     restart: unless-stopped
     environment:

@@ -31,8 +31,8 @@ class Scan(Base):
     error_message = Column(Text, nullable=True)
     errors_count = Column(Integer, default=0)
 
-    # Metadata
-    metadata = Column(JSON, nullable=True)
+    # Extra metadata
+    extra_metadata = Column(JSON, nullable=True)
 
     # Relationships
     files = relationship("File", back_populates="scan", cascade="all, delete-orphan")
@@ -72,8 +72,8 @@ class File(Base):
     category = Column(String(100), nullable=True, index=True)  # document, image, video, code, etc.
     tags = Column(JSON, nullable=True)
 
-    # Metadata
-    metadata = Column(JSON, nullable=True)
+    # Extra metadata
+    extra_metadata = Column(JSON, nullable=True)
 
     # Relationships
     scan = relationship("Scan", back_populates="files")
