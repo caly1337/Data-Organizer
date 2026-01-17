@@ -26,7 +26,7 @@ class ScanResponse(BaseModel):
     total_size: int
     error_message: Optional[str]
     errors_count: int
-    metadata: Optional[Dict[str, Any]]
+    extra_metadata: Optional[Dict[str, Any]] = None
 
     class Config:
         from_attributes = True

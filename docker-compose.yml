@@ -55,7 +55,7 @@ services:
       - "8004:8004"
     volumes:
       - ./backend:/app
-      - /f/data:/mnt/data:ro  # Mount data directory for scanning (read-only)
+      - f:\:/mnt/data:ro  # Mount data directory for scanning (read-only)
     networks:
       - data-organizer-net
     depends_on:

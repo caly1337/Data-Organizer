@@ -3,7 +3,7 @@ Scan API Endpoints
 """
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from typing import List
 import logging
 
@@ -79,7 +79,7 @@ async def run_scan_task(scan_id: int, path: str, max_depth: int, include_hidden:
             scan.completed_at = db.func.now()
 
             if scan_result["errors"]:
-                scan.metadata = {"errors": scan_result["errors"]}
+                scan.extra_metadata = {"errors": scan_result["errors"]}
 
             await db.commit()
 
@@ -154,7 +154,7 @@ async def list_scans(
     query = query.order_by(Scan.started_at.desc())
 
     # Get total count
-    count_result = await db.execute(select(db.func.count()).select_from(Scan))
+    count_result = await db.execute(select(func.count()).select_from(Scan))
     total = count_result.scalar()
 
     # Get scans
