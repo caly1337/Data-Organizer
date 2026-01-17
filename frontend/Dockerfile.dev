@@ -14,5 +14,8 @@ COPY . .
 # Expose port
 EXPOSE 3000
 
-# Start development server
-CMD ["npm", "run", "dev"]
+# Set environment to bind to 0.0.0.0
+ENV HOSTNAME=0.0.0.0
+
+# Start development server (Next.js default port 3000)
+CMD ["npm", "run", "dev", "--", "-H", "0.0.0.0"]
