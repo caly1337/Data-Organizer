@@ -8,7 +8,7 @@ from typing import List
 import logging
 
 from app.database import get_db
-from app.models.scan import Scan
+from app.models.scan import Scan, File
 from app.models.analysis import Analysis
 from app.models.recommendation import Recommendation
 from app.schemas.analysis import AnalysisCreate, AnalysisResponse, RecommendationResponse
@@ -64,7 +64,6 @@ async def run_analysis_task(analysis_id: int, scan_id: int, provider: str, mode:
             files_result = await db.execute(
                 select(File).where(File.scan_id == scan_id).limit(100)
             )
-            from app.models.scan import File
             files = files_result.scalars().all()
 
             for file in files:
