@@ -83,11 +83,10 @@ async def health_check():
 
 
 # Import and include routers
-# from app.api import scans, analysis, recommendations, execution
-# app.include_router(scans.router, prefix="/api/scans", tags=["scans"])
-# app.include_router(analysis.router, prefix="/api/analysis", tags=["analysis"])
-# app.include_router(recommendations.router, prefix="/api/recommendations", tags=["recommendations"])
-# app.include_router(execution.router, prefix="/api/execution", tags=["execution"])
+from app.api import scans, analysis
+
+app.include_router(scans.router, prefix="/api/scans", tags=["scans"])
+app.include_router(analysis.router, prefix="/api/analysis", tags=["analysis"])
 
 
 @app.exception_handler(Exception)
