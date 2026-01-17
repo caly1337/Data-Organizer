@@ -37,6 +37,13 @@ input::placeholder {
   color: #9ca3af !important;
 }
 
+/* Fix checkbox and range inputs */
+input[type="checkbox"],
+input[type="radio"] {
+  background-color: white !important;
+  border-color: #d1d5db !important;
+}
+
 @media (prefers-color-scheme: dark) {
   input, select, textarea {
     background-color: #1f2937 !important;
@@ -48,12 +55,22 @@ input::placeholder {
     color: #6b7280 !important;
   }
 
+  input[type="checkbox"]:checked,
+  input[type="radio"]:checked {
+    background-color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+  }
+
   /* Fix border colors */
   .border {
     border-color: #374151 !important;
   }
 
   /* Fix background colors */
+  .bg-white {
+    background-color: #111827 !important;
+  }
+
   .bg-gray-50 {
     background-color: #1f2937 !important;
   }
@@ -64,6 +81,32 @@ input::placeholder {
 
   .bg-gray-200 {
     background-color: #4b5563 !important;
+    color: #f9fafb !important;
+  }
+
+  .bg-blue-50 {
+    background-color: #1e3a5f !important;
+    color: #e0e7ff !important;
+  }
+
+  .bg-purple-50 {
+    background-color: #3b1e5f !important;
+    color: #ede9fe !important;
+  }
+
+  .bg-yellow-50 {
+    background-color: #4a3f1e !important;
+    color: #fef3c7 !important;
+  }
+
+  .bg-green-50 {
+    background-color: #1e4a2f !important;
+    color: #d1fae5 !important;
+  }
+
+  .bg-red-50 {
+    background-color: #4a1e1e !important;
+    color: #fee2e2 !important;
   }
 
   /* Fix text colors */
@@ -81,6 +124,40 @@ input::placeholder {
 
   .text-gray-800 {
     color: #f3f4f6 !important;
+  }
+
+  /* Fix button text */
+  .bg-gray-200.text-gray-800 {
+    color: #f3f4f6 !important;
+  }
+
+  .bg-gray-200.text-gray-700 {
+    color: #f3f4f6 !important;
+  }
+
+  /* Fix specific colored backgrounds text */
+  .bg-blue-50 .text-gray-700,
+  .bg-purple-50 .text-gray-700,
+  .bg-yellow-50 .text-gray-700,
+  .bg-green-50 .text-gray-700,
+  .bg-red-50 .text-gray-700 {
+    color: #f3f4f6 !important;
+  }
+
+  .bg-green-100 {
+    background-color: #166534 !important;
+  }
+
+  .bg-orange-100 {
+    background-color: #7c2d12 !important;
+  }
+
+  .bg-blue-100 {
+    background-color: #1e3a8a !important;
+  }
+
+  .bg-purple-100 {
+    background-color: #581c87 !important;
   }
 }
 
