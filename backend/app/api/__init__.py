@@ -1,4 +1,4 @@
 """API Routes"""
-from app.api import scans, analysis
+from app.api import scans, analysis, recommendations, execution, providers, websocket
 
-__all__ = ["scans", "analysis"]
+__all__ = ["scans", "analysis", "recommendations", "execution", "providers", "websocket"]

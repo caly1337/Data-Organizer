@@ -83,10 +83,14 @@ async def health_check():
 
 
 # Import and include routers
-from app.api import scans, analysis
+from app.api import scans, analysis, recommendations, execution, providers, websocket
 
 app.include_router(scans.router, prefix="/api/scans", tags=["scans"])
 app.include_router(analysis.router, prefix="/api/analysis", tags=["analysis"])
+app.include_router(recommendations.router, prefix="/api/recommendations", tags=["recommendations"])
+app.include_router(execution.router, prefix="/api/execution", tags=["execution"])
+app.include_router(providers.router, prefix="/api/providers", tags=["providers"])
+app.include_router(websocket.router, prefix="/ws", tags=["websocket"])
 
 
 @app.exception_handler(Exception)
