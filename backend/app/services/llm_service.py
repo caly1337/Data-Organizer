@@ -40,6 +40,13 @@ class OllamaProvider(BaseLLMProvider):
         self.provider_name = "ollama"
         self.base_url = base_url or settings.OLLAMA_BASE_URL
         self.model_name = model or settings.OLLAMA_DEFAULT_MODEL
+
+        # Ensure HTTP (not HTTPS) for Ollama - replace https with http
+        if self.base_url:
+            self.base_url = self.base_url.replace('https://', 'http://')
+            if not self.base_url.startswith('http://'):
+                self.base_url = f'http://{self.base_url}'
+
         self.client = OllamaClient(host=self.base_url)
         self.timeout = settings.OLLAMA_TIMEOUT
 
