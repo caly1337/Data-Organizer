@@ -38,11 +38,16 @@ export default function AnalysisDetailPage() {
       };
 
       ws.onerror = () => {
-        // Fall back to polling
-        if (pollInterval) clearInterval(pollInterval);
-        pollInterval = setInterval(() => {
-          loadAnalysis();
-        }, 3000);
+        // Silently fall back to polling
+      };
+
+      ws.onclose = () => {
+        // WebSocket closed, use polling instead
+        if (!pollInterval) {
+          pollInterval = setInterval(() => {
+            loadAnalysis();
+          }, 3000);
+        }
       };
     } catch (error) {
       // Use polling

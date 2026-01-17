@@ -39,11 +39,16 @@ export default function ScanDetailPage() {
       };
 
       ws.onerror = () => {
-        // WebSocket failed, fall back to polling
-        if (pollInterval) clearInterval(pollInterval);
-        pollInterval = setInterval(() => {
-          loadScan();
-        }, 3000);
+        // Silently fall back to polling (WebSocket optional)
+      };
+
+      ws.onclose = () => {
+        // WebSocket closed, use polling instead
+        if (!pollInterval) {
+          pollInterval = setInterval(() => {
+            loadScan();
+          }, 3000);
+        }
       };
     } catch (error) {
       // WebSocket not available, use polling
