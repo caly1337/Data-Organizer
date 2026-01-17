@@ -76,7 +76,8 @@ async def run_scan_task(scan_id: int, path: str, max_depth: int, include_hidden:
             scan.total_directories = scan_result["total_directories"]
             scan.total_size = scan_result["total_size"]
             scan.errors_count = len(scan_result["errors"])
-            scan.completed_at = db.func.now()
+            from datetime import datetime
+            scan.completed_at = datetime.now()
 
             if scan_result["errors"]:
                 scan.extra_metadata = {"errors": scan_result["errors"]}
