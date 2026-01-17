@@ -139,6 +139,13 @@ export default function Home() {
               <div className="text-2xl mb-2">🤖</div>
               <div className="font-medium">LLM Providers</div>
             </Link>
+            <Link
+              href="/settings"
+              className="p-4 bg-white border rounded-lg hover:shadow transition-shadow text-center"
+            >
+              <div className="text-2xl mb-2">⚙️</div>
+              <div className="font-medium">Settings</div>
+            </Link>
           </div>
         </div>
       </div>

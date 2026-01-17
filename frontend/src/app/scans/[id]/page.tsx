@@ -4,11 +4,15 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import apiClient, { type Scan, type Analysis } from '@/lib/api';
 import { formatBytes, formatNumber, formatDate, getStatusColor } from '@/lib/utils';
+import { configStore } from '@/lib/store';
 
 export default function ScanDetailPage() {
   const params = useParams();
   const router = useRouter();
   const scanId = parseInt(params.id as string);
+
+  // Load config defaults
+  const config = configStore.getConfig();
 
   const [scan, setScan] = useState<Scan | null>(null);
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
@@ -17,8 +21,8 @@ export default function ScanDetailPage() {
 
   // Analysis form
   const [showNewAnalysis, setShowNewAnalysis] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState('ollama');
-  const [selectedMode, setSelectedMode] = useState('fast');
+  const [selectedProvider, setSelectedProvider] = useState(config.defaultProvider);
+  const [selectedMode, setSelectedMode] = useState(config.defaultMode);
 
   useEffect(() => {
     loadScan();

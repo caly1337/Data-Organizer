@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import apiClient, { type Scan } from '@/lib/api';
 import ScanCard from '@/components/ScanCard';
+import { configStore } from '@/lib/store';
 
 export default function ScansPage() {
   const router = useRouter();
@@ -11,10 +12,15 @@ export default function ScansPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Load config defaults
+  const config = configStore.getConfig();
+
   // New scan form state
   const [showNewScan, setShowNewScan] = useState(false);
   const [newScanPath, setNewScanPath] = useState('/mnt/data');
-  const [maxDepth, setMaxDepth] = useState(10);
+  const [maxDepth, setMaxDepth] = useState(config.defaultMaxDepth);
+  const [includeHidden, setIncludeHidden] = useState(config.defaultIncludeHidden);
+  const [followSymlinks, setFollowSymlinks] = useState(config.defaultFollowSymlinks);
 
   useEffect(() => {
     loadScans();
@@ -38,8 +44,8 @@ export default function ScansPage() {
       const scan = await apiClient.createScan({
         path: newScanPath,
         max_depth: maxDepth,
-        include_hidden: false,
-        follow_symlinks: false,
+        include_hidden: includeHidden,
+        follow_symlinks: followSymlinks,
       });
 
       setShowNewScan(false);
@@ -121,6 +127,34 @@ export default function ScansPage() {
                   onChange={(e) => setMaxDepth(parseInt(e.target.value))}
                   className="w-full"
                 />
+              </div>
+
+              <div className="flex gap-6">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="includeHidden"
+                    checked={includeHidden}
+                    onChange={(e) => setIncludeHidden(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="includeHidden" className="text-sm">
+                    Include hidden files
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="followSymlinks"
+                    checked={followSymlinks}
+                    onChange={(e) => setFollowSymlinks(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="followSymlinks" className="text-sm">
+                    Follow symlinks
+                  </label>
+                </div>
               </div>
 
               <div className="flex gap-3">
