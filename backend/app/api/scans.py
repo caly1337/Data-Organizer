@@ -170,8 +170,8 @@ async def list_scans(
     )
 
 
-@router.get("/{scan_id}", response_model=ScanDetailResponse)
-async def get_scan(scan_id: int, include_files: bool = False, db: AsyncSession = Depends(get_db)):
+@router.get("/{scan_id}", response_model=ScanResponse)
+async def get_scan(scan_id: int, db: AsyncSession = Depends(get_db)):
     """Get scan details"""
 
     result = await db.execute(select(Scan).where(Scan.id == scan_id))
@@ -179,13 +179,6 @@ async def get_scan(scan_id: int, include_files: bool = False, db: AsyncSession =
 
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
-
-    if include_files:
-        # Load files
-        files_result = await db.execute(
-            select(File).where(File.scan_id == scan_id).limit(1000)
-        )
-        scan.files = files_result.scalars().all()
 
     return scan
 
