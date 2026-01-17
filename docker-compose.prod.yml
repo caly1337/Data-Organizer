@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  data-organizer-db:
+    image: postgres:15-alpine
+    container_name: data-organizer-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-data_organizer}
+      POSTGRES_USER: ${POSTGRES_USER:-data_organizer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - /opt/data/data-organizer/postgres:/var/lib/postgresql/data
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U data_organizer"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  data-organizer-redis:
+    image: redis:7-alpine
+    container_name: data-organizer-redis
+    restart: always
+    volumes:
+      - /opt/data/data-organizer/redis:/data
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  data-organizer-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: data-organizer-backend:latest
+    container_name: data-organizer-backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://data_organizer:${POSTGRES_PASSWORD}@data-organizer-db:5432/data_organizer
+      REDIS_URL: redis://data-organizer-redis:6379/0
+      DEBUG: "false"
+    env_file:
+      - ./backend/.env.prod
+    ports:
+      - "8004:8004"
+    volumes:
+      - /opt/data:/mnt/data:ro  # Production data mount (read-only)
+      - /home:/mnt/home:ro      # Home directories (read-only)
+    networks:
+      - ai-net
+    depends_on:
+      data-organizer-db:
+        condition: service_healthy
+      data-organizer-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # Next.js Frontend
+  data-organizer-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://spark.lmphq.net:8004
+    image: data-organizer-frontend:latest
+    container_name: data-organizer-frontend
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_URL: http://spark.lmphq.net:8004
+      NODE_ENV: production
+    ports:
+      - "3004:3000"
+    networks:
+      - ai-net
+    depends_on:
+      - data-organizer-backend
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+
+networks:
+  ai-net:
+    external: true
