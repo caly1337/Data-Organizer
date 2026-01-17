@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  data-organizer-db:
+    image: postgres:15-alpine
+    container_name: data-organizer-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: data_organizer
+      POSTGRES_USER: data_organizer
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - "5435:5432"
+    volumes:
+      - data-organizer-db-data:/var/lib/postgresql/data
+    networks:
+      - data-organizer-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U data_organizer"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  data-organizer-redis:
+    image: redis:7-alpine
+    container_name: data-organizer-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - data-organizer-redis-data:/data
+    networks:
+      - data-organizer-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  data-organizer-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: data-organizer-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://data_organizer:dev_password@data-organizer-db:5432/data_organizer
+      REDIS_URL: redis://data-organizer-redis:6379/0
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./backend:/app
+      - /f/data:/mnt/data:ro  # Mount data directory for scanning (read-only)
+    networks:
+      - data-organizer-net
+    depends_on:
+      data-organizer-db:
+        condition: service_healthy
+      data-organizer-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Next.js Frontend
+  data-organizer-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: data-organizer-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8004
+    env_file:
+      - ./frontend/.env
+    ports:
+      - "3004:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - data-organizer-net
+    depends_on:
+      - data-organizer-backend
+
+volumes:
+  data-organizer-db-data:
+    name: data-organizer-db-data
+  data-organizer-redis-data:
+    name: data-organizer-redis-data
+
+networks:
+  data-organizer-net:
+    name: data-organizer-net
+    driver: bridge
