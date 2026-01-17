@@ -24,22 +24,37 @@ export default function ScanDetailPage() {
     loadScan();
     loadAnalyses();
 
-    // Set up WebSocket for real-time updates
-    const ws = apiClient.createScanWebSocket(scanId);
+    // Set up WebSocket for real-time updates (optional)
+    let ws: WebSocket | null = null;
+    let pollInterval: NodeJS.Timeout | null = null;
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'scan_update' || data.type === 'scan_complete') {
-        setScan(data.data);
-      }
-    };
+    try {
+      ws = apiClient.createScanWebSocket(scanId);
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'scan_update' || data.type === 'scan_complete') {
+          setScan(data.data);
+        }
+      };
+
+      ws.onerror = () => {
+        // WebSocket failed, fall back to polling
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(() => {
+          loadScan();
+        }, 3000);
+      };
+    } catch (error) {
+      // WebSocket not available, use polling
+      pollInterval = setInterval(() => {
+        loadScan();
+      }, 3000);
+    }
 
     return () => {
-      ws.close();
+      if (ws) ws.close();
+      if (pollInterval) clearInterval(pollInterval);
     };
   }, [scanId]);
 

@@ -20,20 +20,41 @@ export default function AnalysisDetailPage() {
     loadAnalysis();
     loadRecommendations();
 
-    // WebSocket for real-time updates
-    const ws = apiClient.createAnalysisWebSocket(analysisId);
+    // WebSocket for real-time updates (optional with polling fallback)
+    let ws: WebSocket | null = null;
+    let pollInterval: NodeJS.Timeout | null = null;
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'analysis_update' || data.type === 'analysis_complete') {
-        loadAnalysis();
-        if (data.type === 'analysis_complete') {
-          loadRecommendations();
+    try {
+      ws = apiClient.createAnalysisWebSocket(analysisId);
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'analysis_update' || data.type === 'analysis_complete') {
+          loadAnalysis();
+          if (data.type === 'analysis_complete') {
+            loadRecommendations();
+          }
         }
-      }
-    };
+      };
 
-    return () => ws.close();
+      ws.onerror = () => {
+        // Fall back to polling
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(() => {
+          loadAnalysis();
+        }, 3000);
+      };
+    } catch (error) {
+      // Use polling
+      pollInterval = setInterval(() => {
+        loadAnalysis();
+      }, 3000);
+    }
+
+    return () => {
+      if (ws) ws.close();
+      if (pollInterval) clearInterval(pollInterval);
+    };
   }, [analysisId]);
 
   async function loadAnalysis() {
