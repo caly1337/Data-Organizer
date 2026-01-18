@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-async def run_analysis_task(analysis_id: int, scan_id: int, provider: str, mode: str):
+async def run_analysis_task(analysis_id: int, scan_id: int, provider: str, mode: str, custom_prompt: str = None):
     """Background task to run analysis"""
     from app.database import AsyncSessionLocal
 
@@ -80,7 +80,8 @@ async def run_analysis_task(analysis_id: int, scan_id: int, provider: str, mode:
             analysis_result = await filesystem_analyzer.analyze_scan(
                 scan_data=scan_data,
                 provider=provider,
-                mode=mode
+                mode=mode,
+                custom_prompt=custom_prompt
             )
 
             # Update analysis record
@@ -167,7 +168,8 @@ async def create_analysis(
         analysis.id,
         analysis_data.scan_id,
         analysis_data.provider,
-        analysis_data.mode
+        analysis_data.mode,
+        analysis_data.custom_prompt
     )
 
     logger.info(f"Created analysis {analysis.id} for scan {analysis_data.scan_id}")

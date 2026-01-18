@@ -11,6 +11,7 @@ class AnalysisCreate(BaseModel):
     scan_id: int = Field(..., description="Scan ID to analyze")
     provider: str = Field("ollama", description="LLM provider (ollama, gemini, claude)")
     mode: str = Field("fast", description="Analysis mode (fast, deep, comparison)")
+    custom_prompt: Optional[str] = Field(None, description="Custom analysis prompt (optional)")
 
 
 class AnalysisResponse(BaseModel):

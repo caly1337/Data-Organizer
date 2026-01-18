@@ -20,7 +20,8 @@ class FilesystemAnalyzer:
         self,
         scan_data: Dict[str, Any],
         provider: str = "ollama",
-        mode: str = "fast"
+        mode: str = "fast",
+        custom_prompt: str = None
     ) -> Dict[str, Any]:
         """
         Analyze scan results and generate recommendations
@@ -35,8 +36,14 @@ class FilesystemAnalyzer:
         """
 
         # Build analysis prompt
-        prompt = self._build_analysis_prompt(scan_data, mode)
-        system_prompt = self._build_system_prompt(mode)
+        if custom_prompt:
+            # Use custom prompt with scan context
+            prompt = self._build_custom_prompt(scan_data, custom_prompt)
+            system_prompt = "You are an expert filesystem analyst. Analyze the provided filesystem scan data and respond to the user's request."
+        else:
+            # Use default prompts
+            prompt = self._build_analysis_prompt(scan_data, mode)
+            system_prompt = self._build_system_prompt(mode)
 
         # Generate analysis
         logger.info(f"Analyzing scan with {provider} in {mode} mode")
@@ -219,6 +226,28 @@ Fast Mode Guidelines:
 
         prompt += "\n\nProvide your analysis and recommendations."
 
+        return prompt
+
+    def _build_custom_prompt(self, scan_data: Dict[str, Any], user_prompt: str) -> str:
+        """Build custom prompt with scan context"""
+
+        total_files = scan_data.get("total_files", 0)
+        total_dirs = scan_data.get("total_directories", 0)
+        total_size = scan_data.get("total_size", 0)
+
+        prompt = f"""Analyze the following filesystem scan data according to the user's request.
+
+**Scan Overview:**
+- Path: {scan_data.get('path', 'unknown')}
+- Total Files: {total_files:,}
+- Total Directories: {total_dirs:,}
+- Total Size: {self._format_size(total_size)}
+
+**User's Request:**
+{user_prompt}
+
+Please provide specific, actionable recommendations based on the scan data and the user's request.
+"""
         return prompt
 
     def _parse_recommendations(

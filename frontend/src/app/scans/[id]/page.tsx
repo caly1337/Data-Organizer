@@ -23,6 +23,9 @@ export default function ScanDetailPage() {
   const [showNewAnalysis, setShowNewAnalysis] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState(config.defaultProvider);
   const [selectedMode, setSelectedMode] = useState(config.defaultMode);
+  const [customPrompt, setCustomPrompt] = useState('');
+  const [useCustomPrompt, setUseCustomPrompt] = useState(false);
+  const [showPromptHelp, setShowPromptHelp] = useState(false);
 
   useEffect(() => {
     loadScan();
@@ -94,9 +97,12 @@ export default function ScanDetailPage() {
         scan_id: scanId,
         provider: selectedProvider,
         mode: selectedMode,
+        custom_prompt: useCustomPrompt ? customPrompt : undefined,
       });
 
       setShowNewAnalysis(false);
+      setUseCustomPrompt(false);
+      setCustomPrompt('');
       router.push(`/analysis/${analysis.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create analysis');
@@ -232,6 +238,84 @@ export default function ScanDetailPage() {
                   </select>
                 </div>
 
+                {/* Custom Prompt */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium">
+                      Custom Analysis Prompt
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="useCustomPrompt"
+                        checked={useCustomPrompt}
+                        onChange={(e) => setUseCustomPrompt(e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                      <label htmlFor="useCustomPrompt" className="text-sm">
+                        Use custom prompt
+                      </label>
+                    </div>
+                  </div>
+
+                  {useCustomPrompt && (
+                    <div className="space-y-2">
+                      <textarea
+                        value={customPrompt}
+                        onChange={(e) => setCustomPrompt(e.target.value)}
+                        placeholder="Enter your custom analysis prompt here...&#10;&#10;Example: Focus on finding large files that can be archived or deleted. Identify any duplicate documents and suggest consolidation strategies."
+                        className="w-full px-4 py-3 border rounded-lg h-32 resize-y"
+                      />
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setShowPromptHelp(!showPromptHelp)}
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          {showPromptHelp ? '▼' : '▶'} Show prompt examples
+                        </button>
+                      </div>
+
+                      {showPromptHelp && (
+                        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm space-y-2">
+                          <p className="font-medium">Example prompts:</p>
+                          <div className="space-y-2">
+                            <button
+                              onClick={() => setCustomPrompt("Focus on finding duplicate files and suggest which ones to keep based on file names and modification dates.")}
+                              className="block w-full text-left p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                            >
+                              📋 Focus on duplicates
+                            </button>
+                            <button
+                              onClick={() => setCustomPrompt("Identify large files (>100MB) that haven't been accessed recently and suggest archiving or deleting them.")}
+                              className="block w-full text-left p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                            >
+                              💾 Find large unused files
+                            </button>
+                            <button
+                              onClick={() => setCustomPrompt("Analyze the directory structure and suggest a better organization strategy based on file types and purposes.")}
+                              className="block w-full text-left p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                            >
+                              📁 Reorganization strategy
+                            </button>
+                            <button
+                              onClick={() => setCustomPrompt("Find temporary files, cache files, build artifacts, and other files that can be safely deleted.")}
+                              className="block w-full text-left p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                            >
+                              🧹 Cleanup suggestions
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {!useCustomPrompt && (
+                    <p className="text-sm text-gray-500">
+                      Using default {selectedMode} mode prompt (optimized for general filesystem analysis)
+                    </p>
+                  )}
+                </div>
+
                 <div className="flex gap-3">
                   <button
                     onClick={createAnalysis}
@@ -240,7 +324,11 @@ export default function ScanDetailPage() {
                     Start Analysis
                   </button>
                   <button
-                    onClick={() => setShowNewAnalysis(false)}
+                    onClick={() => {
+                      setShowNewAnalysis(false);
+                      setUseCustomPrompt(false);
+                      setCustomPrompt('');
+                    }}
                     className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
                   >
                     Cancel
