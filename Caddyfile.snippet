@@ -1,0 +1,47 @@
+# =============================================================================
+# Data-Organizer Routes
+# Add this to /opt/ai-stack/infra/caddy/Caddyfile on spark.lmphq.net
+# =============================================================================
+
+filescan.spark.lmphq.net, filescan.lmphq.net {
+    # API routes
+    handle /api/* {
+        reverse_proxy data-organizer-backend:8004
+    }
+
+    handle /ws/* {
+        reverse_proxy data-organizer-backend:8004
+    }
+
+    handle /docs* {
+        reverse_proxy data-organizer-backend:8004
+    }
+
+    handle /metrics {
+        reverse_proxy data-organizer-backend:8004
+    }
+
+    # Frontend (Next.js)
+    handle {
+        reverse_proxy data-organizer-frontend:3000
+    }
+
+    header {
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Authorization, Content-Type"
+    }
+
+    log {
+        output file /var/log/caddy/filescan.log
+    }
+}
+
+# Optional: API-only subdomain
+filescan-api.spark.lmphq.net {
+    reverse_proxy data-organizer-backend:8004
+
+    log {
+        output file /var/log/caddy/filescan-api.log
+    }
+}

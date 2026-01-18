@@ -43,10 +43,6 @@ services:
     image: data-organizer-backend:latest
     container_name: data-organizer-backend
     restart: always
-    environment:
-      DATABASE_URL: postgresql://data_organizer:${POSTGRES_PASSWORD}@data-organizer-db:5432/data_organizer
-      REDIS_URL: redis://data-organizer-redis:6379/0
-      DEBUG: "false"
     env_file:
       - ./backend/.env.prod
     ports:
